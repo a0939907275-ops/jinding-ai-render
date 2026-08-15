@@ -10,6 +10,7 @@ export default function Home() {
   const [preview, setPreview] = useState("");
   const [style, setStyle] = useState("奶茶奢華");
   const [customStyle, setCustomStyle] = useState("");
+  const [styleResearch, setStyleResearch] = useState("");
   const [keep, setKeep] = useState("");
   const [remove, setRemove] = useState("");
   const [add, setAdd] = useState("");
@@ -37,7 +38,8 @@ export default function Home() {
 
   async function postForm(endpoint: string, fields: Record<string, string>, image: File | Blob) {
     const body = new FormData();
-    body.append("image", image, file?.name || "room.png");
+    const normalized = await normalizeImage(image);
+    body.append("image", normalized, "room.png");
     Object.entries(fields).forEach(([key, value]) => body.append(key, value));
     const response = await fetch(endpoint, { method: "POST", body });
     const json = await response.json();
@@ -50,15 +52,28 @@ export default function Home() {
     if (style === "自訂" && !customStyle.trim()) return setError("請描述你想要的自訂風格");
     setPhase("working"); setError("");
     try {
+      let resolvedStyle = style;
+      if (style === "自訂") {
+        setStep(0);
+        const response = await fetch("/api/research-style", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ style: customStyle }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "風格參考搜尋失敗");
+        setStyleResearch(data.research);
+        resolvedStyle = `${customStyle}\n\nGPT 搜尋整理的視覺參考：\n${data.research}`;
+      }
       setStep(1);
       const a = await postForm("/api/analyze-space", {}, file);
       setAnalysis(a.analysis);
       setStep(2);
-      const d = await fetch("/api/create-design", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ analysis: a.analysis, style: style === "自訂" ? customStyle : style, keep, remove, add, other }) });
+      const d = await fetch("/api/create-design", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ analysis: a.analysis, style: resolvedStyle, keep, remove, add, other }) });
       const dj = await d.json(); if (!d.ok) throw new Error(dj.error || "設計規劃失敗");
       setDesign(dj.design);
       setStep(3);
-      const r = await postForm("/api/render", { design: dj.design, style: style === "自訂" ? customStyle : style, keep, remove, add, other }, file);
+      const r = await postForm("/api/render", { design: dj.design, style: resolvedStyle, keep, remove, add, other }, file);
       setResult(r.image); setCompletedAt(new Date().toLocaleString("zh-TW")); setPhase("result");
     } catch (e) { setError(e instanceof Error ? e.message : "發生錯誤"); setPhase("brief"); }
   }
@@ -109,14 +124,32 @@ export default function Home() {
         </section>
         <section className="brief-side"><div className="section-title"><span>02</span><div><p>DESIGN BRIEF</p><h2>告訴我們你的想法</h2></div></div>
           <div className="field-label">選擇設計風格</div><div className="style-grid">{styles.map(s => <button key={s} className={style === s ? "selected" : ""} onClick={() => setStyle(s)}><i>{s === "日式" ? "和" : s === "奶茶奢華" ? "奢" : s === "現代極簡" ? "簡" : s === "北歐" ? "北" : s === "侘寂" ? "寂" : "＋"}</i><span>{s}</span></button>)}</div>
-          {style === "自訂" && <input className="custom" value={customStyle} onChange={e => setCustomStyle(e.target.value)} placeholder="描述你想要的風格"/>}
+          {style === "自訂" && <div className="custom-style-search"><input className="custom" value={customStyle} onChange={e => { setCustomStyle(e.target.value); setStyleResearch(""); }} placeholder="例如：歐美精品飯店、法式奶油復古、自然洞穴風"/><small>生成時會先由 GPT 搜尋合適案例，整理材質、配色、家具與配置參考。</small>{styleResearch && <p>✓ 已完成風格參考研究，將套用於本次 AI 生成</p>}</div>}
           <div className="requirements"><label><span><b>保留</b> 不希望被改動的項目</span><textarea value={keep} onChange={e => setKeep(e.target.value)} placeholder="例：保留原有木地板、窗戶與電視牆"/></label><label><span><b>移除</b> 希望從空間移除</span><textarea value={remove} onChange={e => setRemove(e.target.value)} placeholder="例：移除舊沙發、雜物與吊扇"/></label><label><span><b>新增</b> 想放進空間的內容</span><textarea value={add} onChange={e => setAdd(e.target.value)} placeholder="例：L 型沙發、落地燈、收納櫃"/></label><label><span><b>其他</b> 補充生活需求</span><textarea value={other} onChange={e => setOther(e.target.value)} placeholder="例：家中有寵物，希望好清潔且耐抓"/></label></div>
           {error && <p className="error">{error}</p>}<button className="generate" disabled={!file} onClick={generate}><span>✦</span> 開始 AI 空間改造 <b>→</b></button>{file && <button className="reset" onClick={reset}>清除照片與需求，重新開始</button>}<small className="promise">AI 將保留原始建築結構與拍攝視角，家具配置可重新設計</small>
         </section>
       </div>
     </section>}
 
-    {phase === "working" && <div className="overlay"><div className="loader"><span>金</span><div className="rings"/></div><p>JINDING AI DESIGNING</p><h2>{step === 1 ? "正在理解空間結構…" : step === 2 ? "正在規劃設計方案…" : step === 3 ? "正在生成高品質改造圖…" : "正在套用你的修改…"}</h2><div className="step-dots">{[1,2,3].map(n => <i key={n} className={step >= n ? "on" : ""}/>)}</div><small>請稍候，精緻設計需要一點時間</small></div>}
+    {phase === "working" && <div className="overlay"><div className="loader"><span>金</span><div className="rings"/></div><p>JINDING AI DESIGNING</p><h2>{step === 0 ? "GPT 正在搜尋最合適的風格參考…" : step === 1 ? "正在理解空間結構…" : step === 2 ? "正在規劃設計方案…" : step === 3 ? "正在生成高品質改造圖…" : "正在套用你的修改…"}</h2><div className="step-dots">{[1,2,3].map(n => <i key={n} className={step >= n ? "on" : ""}/>)}</div><small>請稍候，精緻設計需要一點時間</small></div>}
     <footer>© 2026 金鼎室內設計 · AI 輔助概念提案，實際施工仍需專業現場評估</footer>
   </main>;
+}
+
+async function normalizeImage(image: File | Blob): Promise<Blob> {
+  try {
+    const bitmap = await createImageBitmap(image);
+    const maxSide = 2048;
+    const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    const context = canvas.getContext("2d");
+    if (!context) return image;
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    return await new Promise<Blob>((resolve) => canvas.toBlob((blob) => resolve(blob || image), "image/png"));
+  } catch {
+    return image;
+  }
 }

@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 test("MVP exposes the required workflow and API routes", async () => {
   const page = await readFile(new URL("../app/customer-studio.tsx", import.meta.url), "utf8");
   for (const text of ["上傳現場照片", "奶茶奢華", "保留", "移除", "新增", "/api/analyze-space", "/api/create-design", "/api/render", "/api/revise"]) assert.match(page, new RegExp(text));
-  for (const route of ["analyze-space", "create-design", "render", "revise"]) assert.match(await readFile(new URL(`../app/api/${route}/route.ts`, import.meta.url), "utf8"), /export async function POST/);
+  for (const route of ["analyze-space", "create-design", "render", "revise", "research-style"]) assert.match(await readFile(new URL(`../app/api/${route}/route.ts`, import.meta.url), "utf8"), /export async function POST/);
 });
 
 test("prompt engine preserves geometry and supports three layers", async () => {

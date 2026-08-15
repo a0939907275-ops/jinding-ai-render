@@ -27,3 +27,25 @@
 .revision-input > button {
   font-size: 13px;
 }
+
+.custom-style-search {
+  margin: -10px 0 15px;
+}
+
+.custom-style-search .custom {
+  margin: 0;
+}
+
+.custom-style-search small,
+.custom-style-search p {
+  display: block;
+  margin: 7px 2px 0;
+  color: #625f58;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.custom-style-search p {
+  color: #4f6d4c;
+  font-weight: 700;
+}
