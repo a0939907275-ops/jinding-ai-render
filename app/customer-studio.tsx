@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, DragEvent, useEffect, useState } from "react";
+import FontSizeControl from "./font-size-control";
 
 const styles = ["日式", "奶茶奢華", "現代極簡", "北歐", "侘寂", "自訂"];
 type Phase = "brief" | "working" | "result";
@@ -98,7 +99,7 @@ export default function Home() {
     const link = document.createElement("a"); link.href = result; link.download = `金鼎AI空間改造-${Date.now()}.webp`; link.click();
   }
 
-  return <main>
+  return <main><FontSizeControl />
     <header className="topbar"><div className="brand"><span>金</span><div><b>金鼎 AI 室內改造引擎</b><small>JINDING AI DESIGN STUDIO</small></div></div><div className="status"><i /> AI 設計系統已就緒</div></header>
     <section className="hero"><p>AI INTERIOR TRANSFORMATION</p><h1>把現場，變成你想住的樣子。</h1><span>上傳一張照片，保留建築結構與拍攝視角，重新規劃家具、材質、燈光與氛圍。</span></section>
 
