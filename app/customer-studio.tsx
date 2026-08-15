@@ -22,6 +22,7 @@ export default function Home() {
   const [design, setDesign] = useState("");
   const [result, setResult] = useState("");
   const [revision, setRevision] = useState("");
+  const [revisionHistory, setRevisionHistory] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [completedAt, setCompletedAt] = useState("");
   const [comparePosition, setComparePosition] = useState(50);
@@ -80,18 +81,18 @@ export default function Home() {
   }
 
   async function revise() {
-    if (!revision.trim() || !result) return;
+    if (!revision.trim() || !result || !file) return;
     setPhase("working"); setStep(4); setError("");
     try {
-      const blob = await (await fetch(result)).blob();
-      const r = await postForm("/api/revise", { revision, design }, blob);
-      setResult(r.image); setRevision(""); setPhase("result");
+      const nextHistory = [...revisionHistory, revision.trim()];
+      const r = await postForm("/api/revise", { revision: revision.trim(), revisionHistory: nextHistory.join("\n"), design, modelLock: "true", renderMode: "annotated" }, file);
+      setResult(r.image); setRevisionHistory(nextHistory); setRevision(""); setPhase("result");
     } catch (e) { setError(e instanceof Error ? e.message : "續改失敗"); setPhase("result"); }
   }
 
   function reset() {
     if (preview) URL.revokeObjectURL(preview);
-    setFile(null); setPreview(""); setResult(""); setAnalysis(""); setDesign(""); setRevision(""); setError(""); setPhase("brief");
+    setFile(null); setPreview(""); setResult(""); setAnalysis(""); setDesign(""); setRevision(""); setRevisionHistory([]); setError(""); setPhase("brief");
   }
 
   function downloadResult() {
