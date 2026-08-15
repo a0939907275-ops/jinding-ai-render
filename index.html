@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>金鼎 AI 渲染工作室</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, "Noto Sans TC", sans-serif;
+      background: #0f1115;
+      color: #f5f5f5;
+    }
+
+    header {
+      padding: 24px;
+      border-bottom: 1px solid #2b2f36;
+    }
+
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+    }
+
+    header p {
+      margin: 0;
+      color: #aeb6c2;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    .hero {
+      padding: 32px;
+      border: 1px solid #2b2f36;
+      border-radius: 18px;
+      background: #171a20;
+      margin-bottom: 24px;
+    }
+
+    .hero h2 {
+      margin-top: 0;
+      font-size: 32px;
+    }
+
+    .hero p {
+      color: #b8c0cc;
+      line-height: 1.7;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid #2b2f36;
+      background: #171a20;
+    }
+
+    .card h3 {
+      margin-top: 0;
+    }
+
+    .card p {
+      color: #aeb6c2;
+      line-height: 1.6;
+    }
+
+    .upload-box {
+      margin-top: 24px;
+      padding: 28px;
+      border: 1px dashed #4a5360;
+      border-radius: 16px;
+      text-align: center;
+      background: #13161b;
+    }
+
+    .upload-box input {
+      margin-top: 14px;
+    }
+
+    button {
+      margin-top: 14px;
+      padding: 12px 18px;
+      border: 0;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      background: #ffffff;
+      color: #111111;
+      font-weight: bold;
+    }
+
+    footer {
+      padding: 24px;
+      text-align: center;
+      color: #7f8792;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>金鼎 AI 渲染工作室</h1>
+    <p>AI 室內設計 × SketchUp 渲染 × 空間視覺化</p>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h2>把設計想法，快速變成可視化畫面。</h2>
+      <p>
+        上傳室內照片或 SketchUp 模型畫面，
+        透過 AI 協助生成不同風格、材質、燈光與家具配置，
+        同時盡量保留原始空間結構與比例。
+      </p>
+
+      <div class="upload-box">
+        <strong>上傳模型畫面或室內照片</strong><br />
+        <input type="file" accept="image/*,.pdf" />
+        <br />
+        <button type="button">開始 AI 渲染</button>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h3>AI 室內設計</h3>
+        <p>依照空間照片快速產生不同室內設計風格。</p>
+      </div>
+
+      <div class="card">
+        <h3>SketchUp 渲染</h3>
+        <p>以 SketchUp 畫面作為基礎，協助生成寫實視覺效果。</p>
+      </div>
+
+      <div class="card">
+        <h3>材質與家具</h3>
+        <p>調整牆面、地板、櫃體、家具與燈光氛圍。</p>
+      </div>
+
+      <div class="card">
+        <h3>標記與備註</h3>
+        <p>讓設計需求可以直接標記位置並留下施工或修改說明。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    金鼎設計有限公司｜金鼎 AI 渲染工作室
+  </footer>
+
+</body>
+</html>
