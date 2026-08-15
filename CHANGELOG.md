@@ -7,6 +7,7 @@
 ### Added
 
 - PROJECT_CONTEXT、CHANGELOG、環境變數範本與 Git ignore 規則。
+- GitHub Actions CI：驗證靜態入口、必要文件及常見秘密格式。
 
 ## [0.1.0] - 2026-08-15
 

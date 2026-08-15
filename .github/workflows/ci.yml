@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Validate static site
+        shell: bash
+        run: |
+          test -s index.html
+          grep -Eiq '<!doctype html|<html' index.html
+          test -s README.md
+          test -s PROJECT_CONTEXT.md
+          test -s CHANGELOG.md
+          test -s .env.example
+
+      - name: Scan common secret formats
+        shell: bash
+        run: |
+          if git grep -En '(ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY)' -- ':!.github/workflows/ci.yml'; then
+            echo 'Potential secret detected.'
+            exit 1
+          fi
