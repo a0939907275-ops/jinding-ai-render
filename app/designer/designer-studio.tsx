@@ -24,4 +24,4 @@ export default function DesignerStudio(){
 
 async function normalizeImage(image:File|Blob):Promise<Blob>{try{const bitmap=await createImageBitmap(image),maxSide=2048,scale=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height)),canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));const context=canvas.getContext("2d");if(!context)return image;context.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();return await new Promise<Blob>(resolve=>canvas.toBlob(blob=>resolve(blob||image),"image/png"))}catch{return image}}
 
-function noteSummary(notes:ImageNote[]){return notes.length?notes.map((note,index)=>`${index+1}. 圖片水平 ${note.x}%、垂直 ${note.y}%：${note.text}`).join("\n"):"無定位備註"}
+function noteSummary(notes:ImageNote[]){return notes.length?notes.map((n,i)=>n.x2!==undefined?`${i+1}. 線段從 (${n.x}%, ${n.y}%) 到 (${n.x2}%, ${n.y2}%)，沿完整線段執行：${n.text}`:`${i+1}. 單點 (${n.x}%, ${n.y}%)：${n.text}`).join("\n"):"無定位備註"}
