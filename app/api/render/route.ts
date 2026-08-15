@@ -1,7 +1,10 @@
 import { failure, openAI, validateImage } from "../../../lib/openai";
 import { renderPrompt } from "../../../lib/prompt-engine";
+import { requireApiUser } from "../../../lib/require-api-user";
 
 export async function POST(request: Request) {
+  const unauthorized = await requireApiUser();
+  if (unauthorized) return unauthorized;
   try {
     const input = await request.formData(); const image = validateImage(input.get("image"));
     const fields: Record<string,string> = {}; input.forEach((value,key) => { if (typeof value === "string") fields[key] = value; });

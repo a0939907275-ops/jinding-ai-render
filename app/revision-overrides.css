@@ -1,0 +1,29 @@
+.revision > div:first-child > b {
+  color: #111;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.revision > div:first-child > span {
+  color: #111;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.quick-revisions button {
+  color: #111;
+  font-size: 12px;
+}
+
+.revision input {
+  color: #111;
+  font-size: 14px;
+}
+
+.revision input::placeholder {
+  color: #666;
+}
+
+.revision-input > button {
+  font-size: 13px;
+}

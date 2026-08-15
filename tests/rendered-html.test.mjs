@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 test("MVP exposes the required workflow and API routes", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const page = await readFile(new URL("../app/customer-studio.tsx", import.meta.url), "utf8");
   for (const text of ["上傳現場照片", "奶茶奢華", "保留", "移除", "新增", "/api/analyze-space", "/api/create-design", "/api/render", "/api/revise"]) assert.match(page, new RegExp(text));
   for (const route of ["analyze-space", "create-design", "render", "revise"]) assert.match(await readFile(new URL(`../app/api/${route}/route.ts`, import.meta.url), "utf8"), /export async function POST/);
 });

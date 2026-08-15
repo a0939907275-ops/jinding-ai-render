@@ -1,7 +1,10 @@
 import { failure, openAI, validateImage } from "../../../lib/openai";
 import { RENDER_DIRECTOR } from "../../../lib/prompt-engine";
+import { requireApiUser } from "../../../lib/require-api-user";
 
 export async function POST(request: Request) {
+  const unauthorized = await requireApiUser();
+  if (unauthorized) return unauthorized;
   try {
     const input = await request.formData(); const image = validateImage(input.get("image")); const revision = String(input.get("revision") || "").trim();
     if (!revision || revision.length > 1000) return Response.json({ error: "修改需求必須介於 1 至 1000 字" }, { status: 400 });

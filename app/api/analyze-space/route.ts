@@ -1,7 +1,10 @@
 import { failure, openAI, responseText, validateImage } from "../../../lib/openai";
 import { SPACE_ANALYZER } from "../../../lib/prompt-engine";
+import { requireApiUser } from "../../../lib/require-api-user";
 
 export async function POST(request: Request) {
+  const unauthorized = await requireApiUser();
+  if (unauthorized) return unauthorized;
   try {
     const form = await request.formData(); const image = validateImage(form.get("image"));
     const base64 = Buffer.from(await image.arrayBuffer()).toString("base64");

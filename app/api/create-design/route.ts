@@ -1,7 +1,10 @@
 import { failure, openAI, responseText } from "../../../lib/openai";
 import { DESIGN_DIRECTOR } from "../../../lib/prompt-engine";
+import { requireApiUser } from "../../../lib/require-api-user";
 
 export async function POST(request: Request) {
+  const unauthorized = await requireApiUser();
+  if (unauthorized) return unauthorized;
   try {
     const input = await request.json();
     const brief = `空間分析：${input.analysis}\n風格：${input.style}\n保留：${input.keep || "未指定"}\n移除：${input.remove || "未指定"}\n新增：${input.add || "未指定"}\n其他：${input.other || "未指定"}`;
