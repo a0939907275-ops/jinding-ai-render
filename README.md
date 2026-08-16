@@ -1,14 +1,16 @@
-# 金鼎 AI 渲染工作室
+# 金鼎 AI 室內改造引擎
 
-AI 室內設計與 SketchUp 渲染專案。
+上傳單張現場照片，經 Space Analyzer、Design Director、Render Director 三層流程生成室內改造圖，並支援以結果圖繼續修改。
 
-## 目前目標
-- 上傳室內照片或模型畫面
-- AI 生成室內設計效果
-- 保留原始空間格局與主要結構
-- 支援材質、家具、燈光與風格設定
-- SketchUp 渲染整合
-- 標記與備註功能
+## 本機執行
 
-## 專案狀態
-此 repository 為新版重建版本，之後以 GitHub 作為主要原始碼版本管理。
+需要 Node.js 22.13+ 與 `OPENAI_API_KEY`。
+
+```bash
+pnpm install
+pnpm dev
+```
+
+API：`/api/analyze-space`、`/api/create-design`、`/api/render`、`/api/revise`。
+
+此版本不包含 CAD、SKP、自動尺寸、報價或施工圖。
