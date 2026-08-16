@@ -64,3 +64,4 @@
 - 密鑰僅由伺服器使用；正式環境需設定 `JINDING_PLATFORM_URL` 與 `JINDING_INTEGRATION_SECRET`。
 - 2026-08-16：新增 Vercel Serverless `POST /api/renders` 與 `/health`，支援建立及完成事件同步至中央控制中心。
 - 2026-08-16：補齊 created、processing、completed、failed 狀態與案件名稱、空間、原圖、結果圖、提示詞、風格等統一欄位。
+- 2026-08-16：正式 Vercel 環境完成共用 Webhook Secret 設定；正式測試任務已成功同步至控制中心並進入待確認。
