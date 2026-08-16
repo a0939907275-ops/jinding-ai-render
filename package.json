@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "check": "node --check server.mjs && node --check render-client.js"
+    "check": "node --check server.mjs && node --check render-client.js && node --check api/renders.mjs && node --check api/health.mjs"
   },
   "engines": { "node": ">=20" }
 }

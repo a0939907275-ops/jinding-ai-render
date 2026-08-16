@@ -62,3 +62,4 @@
 - 新增 Node.js 伺服器與 `POST /api/renders`。
 - 使用者建立改造任務時，會送出 `render.created` 到金鼎 AI 控制中心。
 - 密鑰僅由伺服器使用；正式環境需設定 `JINDING_PLATFORM_URL` 與 `JINDING_INTEGRATION_SECRET`。
+- 2026-08-16：新增 Vercel Serverless `POST /api/renders` 與 `/health`，支援建立及完成事件同步至中央控制中心。
