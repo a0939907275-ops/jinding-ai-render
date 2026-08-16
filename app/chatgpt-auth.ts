@@ -19,6 +19,17 @@ const SIGN_OUT_PATH = "/signout-with-chatgpt";
 const CALLBACK_PATH = "/callback";
 
 export async function getChatGPTUser(): Promise<ChatGPTUser | null> {
+  // Vercel Deployment Protection authenticates access before the request
+  // reaches this app. Sites deployments continue to use ChatGPT headers.
+  if (process.env.VERCEL === "1") {
+    return {
+      userId: "vercel-protected-user",
+      displayName: "金鼎設計",
+      email: "protected@jinding.local",
+      fullName: "金鼎設計",
+    };
+  }
+
   const requestHeaders = await headers();
   const userId = requestHeaders.get(USER_ID_HEADER);
   const email = requestHeaders.get(USER_EMAIL_HEADER);
