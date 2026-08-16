@@ -40,6 +40,10 @@
 
 目前可作為純靜態網站部署，入口為 `index.html`。尚未在 repo 中確認正式託管平台或自動部署流程。
 
+## 驗證狀態
+
+- 2026-08-16：`index.html` 靜態入口與五個必要文件檢查通過；常見 GitHub／OpenAI／AWS token 與私鑰格式掃描無命中。
+
 ## GPT / Codex 接手流程
 
 1. `git pull --ff-only`。
