@@ -1,0 +1,11 @@
+{
+  "name": "jinding-ai-render",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check server.mjs && node --check render-client.js"
+  },
+  "engines": { "node": ">=20" }
+}

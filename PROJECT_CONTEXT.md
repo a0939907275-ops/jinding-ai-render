@@ -57,3 +57,8 @@
 - 產品 owner、目標使用者與第一版驗收標準。
 - AI 模型／供應商、費用上限及輸入圖片的隱私保存政策。
 - 正式網域、託管平台與 repo 可見性。
+# 2026-08-16 中央 CRM 串接更新
+
+- 新增 Node.js 伺服器與 `POST /api/renders`。
+- 使用者建立改造任務時，會送出 `render.created` 到金鼎 AI 控制中心。
+- 密鑰僅由伺服器使用；正式環境需設定 `JINDING_PLATFORM_URL` 與 `JINDING_INTEGRATION_SECRET`。
