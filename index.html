@@ -90,6 +90,16 @@
       margin-top: 14px;
     }
 
+    .render-field {
+      width: min(100%, 560px);
+      margin: 14px auto 0;
+      padding: 11px 12px;
+      border: 1px solid #3a424e;
+      border-radius: 10px;
+      background: #0f1115;
+      color: #f5f5f5;
+    }
+
     button {
       margin-top: 14px;
       padding: 12px 18px;
@@ -129,6 +139,12 @@
       <div class="upload-box">
         <strong>上傳模型畫面或室內照片</strong><br />
         <input type="file" accept="image/*,.pdf" />
+        <br />
+        <input class="render-field" name="projectName" aria-label="案件名稱" placeholder="案件名稱，例如：左營王宅客廳" />
+        <br />
+        <input class="render-field" name="style" aria-label="設計風格" placeholder="設計風格，例如：現代簡約" />
+        <br />
+        <input class="render-field" name="prompt" aria-label="改造需求" placeholder="改造需求，例如：保留格局、改成暖色木質調" />
         <br />
         <button type="button">開始 AI 渲染</button>
       </div>

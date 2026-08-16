@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { normalizeRender } from "../render-payload.mjs";
 
 export default async function handler(request, response) {
   if (request.method !== "POST") {
@@ -12,11 +13,17 @@ export default async function handler(request, response) {
     return response.status(503).json({ error: "Integration is not configured" });
   }
 
-  const render = request.body && typeof request.body === "object" ? request.body : {};
-  const externalId = typeof render.externalId === "string" && render.externalId.trim()
-    ? render.externalId.trim()
+  const input = request.body && typeof request.body === "object" ? request.body : {};
+  let render;
+  try {
+    render = normalizeRender(input);
+  } catch (error) {
+    return response.status(400).json({ error: error instanceof Error ? error.message : "Invalid render" });
+  }
+  const externalId = typeof input.externalId === "string" && input.externalId.trim()
+    ? input.externalId.trim().slice(0, 240)
     : `render-${randomUUID()}`;
-  const eventType = render.status === "completed" ? "render.completed" : "render.created";
+  const eventType = `render.${render.status}`;
 
   try {
     const upstream = await fetch(`${platformUrl}/api/events`, {
@@ -30,13 +37,7 @@ export default async function handler(request, response) {
         eventType,
         source: "interior_render_mvp",
         occurredAt: new Date().toISOString(),
-        data: {
-          externalId,
-          originalImageUrl: render.originalImageUrl,
-          resultImageUrl: render.resultImageUrl,
-          prompt: render.prompt,
-          style: render.style,
-        },
+        data: { ...render, externalId },
       }),
     });
     const result = await upstream.json();

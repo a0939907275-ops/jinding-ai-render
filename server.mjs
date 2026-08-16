@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
+import { normalizeRender } from "./render-payload.mjs";
 
 const port = Number(process.env.PORT || 3400);
 
@@ -35,21 +36,25 @@ createServer(async (request, response) => {
   if (!platformUrl || !secret) return send(response, 503, "application/json", JSON.stringify({ error: "Integration is not configured" }));
 
   try {
-    const render = await jsonBody(request);
-    const externalId = `render-${randomUUID()}`;
+    const input = await jsonBody(request);
+    const render = normalizeRender(input);
+    const externalId = typeof input.externalId === "string" && input.externalId.trim()
+      ? input.externalId.trim().slice(0, 240)
+      : `render-${randomUUID()}`;
+    const eventType = `render.${render.status}`;
     const upstream = await fetch(`${platformUrl}/api/events`, {
       method: "POST",
       headers: { "content-type": "application/json", "x-integration-secret": secret },
       body: JSON.stringify({
-        eventId: `render-event-${externalId}`,
-        eventType: "render.created",
+        eventId: `render-event-${eventType}-${externalId}`,
+        eventType,
         source: "interior_render_mvp",
         occurredAt: new Date().toISOString(),
-        data: { externalId, originalImageUrl: render.originalImageUrl, prompt: render.prompt, style: render.style },
+        data: { ...render, externalId },
       }),
     });
     const result = await upstream.json();
-    return send(response, upstream.ok ? 201 : 502, "application/json", JSON.stringify(upstream.ok ? { ok: true, externalId } : result));
+    return send(response, upstream.ok ? 201 : 502, "application/json", JSON.stringify(upstream.ok ? { ok: true, externalId, eventType } : result));
   } catch (error) {
     console.error(error);
     return send(response, 400, "application/json", JSON.stringify({ error: "Invalid request" }));

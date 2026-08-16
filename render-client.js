@@ -1,5 +1,8 @@
 const button = document.querySelector("button");
 const file = document.querySelector("input[type='file']");
+const projectName = document.querySelector("input[name='projectName']");
+const style = document.querySelector("input[name='style']");
+const prompt = document.querySelector("input[name='prompt']");
 
 button?.addEventListener("click", async () => {
   if (!file?.files?.length) return alert("請先選擇圖片或 PDF");
@@ -9,7 +12,13 @@ button?.addEventListener("click", async () => {
     const response = await fetch("/api/renders", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ originalImageUrl: `local-file://${file.files[0].name}` }),
+      body: JSON.stringify({
+        originalImageUrl: `local-file://${file.files[0].name}`,
+        projectName: projectName?.value,
+        style: style?.value,
+        prompt: prompt?.value,
+        status: "created",
+      }),
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "建立失敗");
