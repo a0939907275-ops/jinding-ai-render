@@ -75,7 +75,7 @@ export default function Home() {
       const dj = await d.json(); if (!d.ok) throw new Error(dj.error || "設計規劃失敗");
       setDesign(dj.design);
       setStep(3);
-      const r = await postForm("/api/render", { design: dj.design, style: resolvedStyle, keep, remove, add, other }, file);
+      const r = await postForm("/api/render", { design: dj.design, style: resolvedStyle, keep, remove, add, other, audience: "customer" }, file);
       setResult(r.image); setCompletedAt(new Date().toLocaleString("zh-TW")); setPhase("result");
     } catch (e) { setError(e instanceof Error ? e.message : "發生錯誤"); setPhase("brief"); }
   }
@@ -85,7 +85,7 @@ export default function Home() {
     setPhase("working"); setStep(4); setError("");
     try {
       const nextHistory = [...revisionHistory, revision.trim()];
-      const r = await postForm("/api/revise", { revision: revision.trim(), revisionHistory: nextHistory.join("\n"), design, modelLock: "true", renderMode: "annotated" }, file);
+      const r = await postForm("/api/revise", { revision: revision.trim(), revisionHistory: nextHistory.join("\n"), design, modelLock: "true", renderMode: "annotated", audience: "customer" }, file);
       setResult(r.image); setRevisionHistory(nextHistory); setRevision(""); setPhase("result");
     } catch (e) { setError(e instanceof Error ? e.message : "續改失敗"); setPhase("result"); }
   }

@@ -27,3 +27,10 @@ test("revisions use the original image with cumulative instructions", async () =
   assert.match(designer, /revisionHistory/); assert.doesNotMatch(designer, /fetch\(result\)/);
   assert.match(route, /原始圖片/); assert.match(route, /validateTextFields/);
 });
+
+test("customer rendering uses the faster medium tier while designer stays high", async () => {
+  const customer = await readFile(new URL("../app/customer-studio.tsx", import.meta.url), "utf8");
+  const render = await readFile(new URL("../app/api/render/route.ts", import.meta.url), "utf8");
+  assert.match(customer, /audience: "customer"/);
+  assert.match(render, /fields\.audience === "customer" \? "medium" : "high"/);
+});
