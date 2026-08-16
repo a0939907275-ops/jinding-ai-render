@@ -1,55 +1,65 @@
-# PROJECT_CONTEXT — 金鼎 AI 渲染工作室
+# PROJECT_CONTEXT — 金鼎 AI 室內改造引擎
 
-> 最後更新：2026-08-16
->
-> Repo：`a0939907275-ops/jinding-ai-render`
->
-> 狀態：早期公開展示頁；尚未建立實際 AI 渲染後端
+> 最後更新：2026-08-16  
+> GitHub：`a0939907275-ops/jinding-ai-render`  
+> 正式網站：`https://jinding-ai-space-studio.jding1491.chatgpt.site`
 
-## 目前進度
+## 目前狀態
 
-- 已有 `index.html` 單頁展示網站及簡介 README。
-- 尚無套件管理、後端服務、自動測試或部署設定。
-- 2026-08-16 補齊跨裝置交接、版本、安全與環境範本文件。
-- 2026-08-16 新增 GitHub Actions CI，驗證靜態入口、必要文件及常見秘密格式。
+本專案已由早期 `index.html` 展示頁升級為可實際使用的 AI 室內改造網站。正式程式採 React、TypeScript、vinext 與 Cloudflare Workers 相容輸出；根目錄的 `index.html` 僅保留作為早期展示版本與歷史參考，不是正式入口。
 
-## 架構
+## 對外入口
+
+- 客戶版：`/`
+- 設計師版：`/designer`
+- 兩版皆要求使用 ChatGPT 帳號登入。
+
+## 核心流程
+
+1. 上傳 JPG、PNG 或 WEBP 現場圖片。
+2. Space Analyzer 分析空間。
+3. Design Director 產生設計策略。
+4. Render Director 以原圖為基礎生成改造圖。
+5. 使用者可輸入累積續改指令；續改會回到原始圖片重新套用，降低結構漂移。
+
+## 品質與成本策略
+
+- 客戶版：GPT Image 2，中等品質，優先控制速度與成本。
+- 設計師版：GPT Image 2，高品質，優先保留模型、視角與細節。
+- 設計師版支援點與線標記、端點拖曳、整體移動、複製及刪除。
+
+## API
+
+- `/api/analyze-space`
+- `/api/create-design`
+- `/api/research-style`
+- `/api/render`
+- `/api/revise`
+
+所有 AI API 均在伺服器端執行並要求登入；`OPENAI_API_KEY` 只能透過託管平台秘密設定，禁止提交到 Git。
+
+## 開發與驗證
 
 ```text
-瀏覽器 → index.html（純靜態 HTML / CSS）
+npm install
+npm run dev
+npm test
+npm run build
 ```
 
-目前沒有 API、資料庫或秘密環境變數。
+`sources/` 是同步參考資料，必須保持唯讀。`.openai/hosting.json` 僅包含 Sites 專案識別資訊，不得放入秘密值。
 
-## 重要決策
+## GitHub 工作方式
 
-- GitHub 是程式碼與專案狀態的唯一真相來源。
-- 現階段保留零建置工具的靜態架構，直到 AI 渲染需求與服務供應商確定。
-- 未來的 AI API key 只能放在伺服器端秘密管理中，禁止寫入瀏覽器程式或 Git。
-- `main` 保持可直接預覽；新功能使用短生命週期 branch 與 PR。
+1. GitHub `main` 保持穩定。
+2. 從最新 `main` 建立 `agent/*` 或功能分支。
+3. 修改前先檢查工作區及遠端差異。
+4. 執行密鑰掃描、測試及建置。
+5. 使用一般 push 與 Pull Request；禁止 force push。
 
-## 下一步
+## 待辦
 
-1. 確認此 repo 保持公開或改為私人；接入 AI API 前建議重新評估可見性。
-2. 定義第一版使用流程：上傳、風格選擇、生成、下載與任務紀錄。
-3. 選定 AI 影像服務、後端 runtime、儲存與身分驗證方式。
-4. 建立後端後擴充自動測試及部署文件。
-5. 為 `main` 啟用 branch protection。
-
-## 部署方式
-
-目前可作為純靜態網站部署，入口為 `index.html`。尚未在 repo 中確認正式託管平台或自動部署流程。
-
-## GPT / Codex 接手流程
-
-1. `git pull --ff-only`。
-2. 閱讀本文件、README、CHANGELOG 與最近 commits。
-3. 檢查 GitHub 上是否已有未合併 branch / PR。
-4. 從最新 `main` 建立工作 branch。
-5. 完成後更新本文件與 CHANGELOG，再 commit、push 並以 PR 合併。
-
-## 待確認事項
-
-- 產品 owner、目標使用者與第一版驗收標準。
-- AI 模型／供應商、費用上限及輸入圖片的隱私保存政策。
-- 正式網域、託管平台與 repo 可見性。
+- 在 Pull Request 確認完整 MVP 與早期靜態展示頁的整合內容。
+- 為 `main` 啟用 branch protection。
+- 增加 API 模擬測試與瀏覽器互動測試。
+- 評估參考圖片搜尋、使用額度與任務紀錄功能。
