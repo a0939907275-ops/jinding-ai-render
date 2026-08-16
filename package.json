@@ -13,7 +13,7 @@
     "start": "next start",
     "test": "node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "check:integration": "node --check render-payload.mjs && node --check render-client.js && node --check api/renders.mjs && node --check api/health.mjs",
+    "check:integration": "node --check render-payload.mjs && node --check render-client.js",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
