@@ -4,6 +4,8 @@
 import {ChangeEvent, DragEvent, useEffect, useMemo, useState} from "react";
 import FontSizeControl from "./font-size-control";
 import ImageAnnotator, {ImageNote, RenderMode} from "./designer/image-annotator";
+import AutoLayoutPlanner from "./auto-layout-planner";
+import {layoutPlanForPrompt, type LayoutPlan} from "../lib/layout-planning";
 
 const styles = ["日式", "奶茶奢華", "現代極簡", "北歐", "侘寂", "自訂"];
 type Mode = "general" | "professional";
@@ -42,6 +44,8 @@ export default function RenderStudio({initialMode = "general"}: {initialMode?: M
   const [seed, setSeed] = useState("");
   const [variation, setVariation] = useState("1");
   const [hdOutput, setHdOutput] = useState(true);
+  const [layoutPlan, setLayoutPlan] = useState<LayoutPlan | null>(null);
+  const [selectedLayoutId, setSelectedLayoutId] = useState<""|"A"|"B"|"C">("");
   const [phase, setPhase] = useState<Phase>("brief");
   const [step, setStep] = useState(0);
   const [analysis, setAnalysis] = useState("");
@@ -66,7 +70,7 @@ export default function RenderStudio({initialMode = "general"}: {initialMode?: M
     if (!["image/jpeg", "image/png", "image/webp"].includes(next.type)) return setError("僅支援 JPG、PNG 或 WEBP 圖片");
     if (next.size > 15 * 1024 * 1024) return setError("圖片需小於 15 MB");
     if (preview) URL.revokeObjectURL(preview);
-    setFile(next); setPreview(URL.createObjectURL(next)); setImageNotes([]); setError(""); setPhase("brief"); setResult(""); setVersions([]);
+    setFile(next); setPreview(URL.createObjectURL(next)); setImageNotes([]); setLayoutPlan(null); setSelectedLayoutId(""); setError(""); setPhase("brief"); setResult(""); setVersions([]);
   }
 
   function acceptReference(next?: File) {
@@ -98,6 +102,7 @@ export default function RenderStudio({initialMode = "general"}: {initialMode?: M
       openingsLock: "true", cameraLock: "true", materialZones,
       colorTemperature, lightDirection, lightIntensity, furnitureReplacement, prompt, negativePrompt,
       seed, variation, hdOutput: String(mode === "professional" && hdOutput), referenceImage: referenceFile ? "已提供第二張參考圖，只能作為材質與風格參考" : "無",
+      layoutPlan: layoutPlan && selectedLayoutId ? layoutPlanForPrompt(layoutPlan, selectedLayoutId) : "尚未套用 AI 自動配置方案",
     };
   }
 
@@ -137,7 +142,7 @@ export default function RenderStudio({initialMode = "general"}: {initialMode?: M
 
   function reset() {
     if (preview) URL.revokeObjectURL(preview); if (referencePreview) URL.revokeObjectURL(referencePreview);
-    setFile(null); setPreview(""); setReferenceFile(null); setReferencePreview(""); setResult(""); setAnalysis(""); setDesign(""); setRevision(""); setRevisionHistory([]); setVersions([]); setImageNotes([]); setError(""); setPhase("brief");
+    setFile(null); setPreview(""); setReferenceFile(null); setReferencePreview(""); setResult(""); setAnalysis(""); setDesign(""); setRevision(""); setRevisionHistory([]); setVersions([]); setImageNotes([]); setLayoutPlan(null); setSelectedLayoutId(""); setError(""); setPhase("brief");
   }
 
   function downloadResult() { if (result) { const link = document.createElement("a"); link.href = result; link.download = `金鼎AI空間渲染-${Date.now()}.webp`; link.click(); } }
@@ -164,7 +169,7 @@ export default function RenderStudio({initialMode = "general"}: {initialMode?: M
         <div className="field-label">選擇設計風格</div><div className="style-grid">{styles.map(item => <button key={item} className={style === item ? "selected" : ""} onClick={() => setStyle(item)}><i>{item === "日式" ? "和" : item === "奶茶奢華" ? "奢" : item === "現代極簡" ? "簡" : item === "北歐" ? "北" : item === "侘寂" ? "寂" : "＋"}</i><span>{item}</span></button>)}</div>
         {style === "自訂" && <div className="custom-style-search"><input className="custom" value={customStyle} onChange={e => {setCustomStyle(e.target.value); setStyleResearch("");}} placeholder="直接輸入想要的風格"/><small>生成時由 GPT 整理材質、配色、家具與配置參考。</small></div>}
         <div className="quick-controls"><label>色系<input value={colorScheme} onChange={e => setColorScheme(e.target.value)} placeholder="暖白、奶茶、深木色…"/></label><label>基本燈光<select value={basicLighting} onChange={e => setBasicLighting(e.target.value)}><option>明亮自然光</option><option>溫暖情境光</option><option>中性均勻光</option><option>夜間氛圍光</option></select></label></div>
-        {mode === "general" ? <label className="simple-request">簡單修改需求<textarea value={other} onChange={e => setOther(e.target.value)} placeholder="例如：增加收納、換成淺色沙發、整體更明亮…"/></label> : <ProfessionalControls preview={preview} imageNotes={imageNotes} setImageNotes={setImageNotes} renderMode={renderMode} setRenderMode={setRenderMode} values={{keep,remove,add,other,materialZones,colorTemperature,lightDirection,lightIntensity,furnitureReplacement,prompt,negativePrompt,seed,variation}} setters={{setKeep,setRemove,setAdd,setOther,setMaterialZones,setColorTemperature,setLightDirection,setLightIntensity,setFurnitureReplacement,setPrompt,setNegativePrompt,setSeed,setVariation}} locks={{structureLock,cabinetLock,wallLock,openingsLock,cameraLock}} lockSetters={{setStructureLock,setCabinetLock,setWallLock,setOpeningsLock,setCameraLock}} referencePreview={referencePreview} acceptReference={acceptReference} hdOutput={hdOutput} setHdOutput={setHdOutput}/>}
+        {mode === "general" ? <label className="simple-request">簡單修改需求<textarea value={other} onChange={e => setOther(e.target.value)} placeholder="例如：增加收納、換成淺色沙發、整體更明亮…"/></label> : <><AutoLayoutPlanner file={file} analysis={analysis} annotations={annotations} plan={layoutPlan} selectedId={selectedLayoutId} onPlan={plan=>{setLayoutPlan(plan);setSelectedLayoutId("")}} onApply={setSelectedLayoutId}/><ProfessionalControls preview={preview} imageNotes={imageNotes} setImageNotes={setImageNotes} renderMode={renderMode} setRenderMode={setRenderMode} values={{keep,remove,add,other,materialZones,colorTemperature,lightDirection,lightIntensity,furnitureReplacement,prompt,negativePrompt,seed,variation}} setters={{setKeep,setRemove,setAdd,setOther,setMaterialZones,setColorTemperature,setLightDirection,setLightIntensity,setFurnitureReplacement,setPrompt,setNegativePrompt,setSeed,setVariation}} locks={{structureLock,cabinetLock,wallLock,openingsLock,cameraLock}} lockSetters={{setStructureLock,setCabinetLock,setWallLock,setOpeningsLock,setCameraLock}} referencePreview={referencePreview} acceptReference={acceptReference} hdOutput={hdOutput} setHdOutput={setHdOutput}/></>}
         {error && <p className="error">{error}</p>}<button className="generate" disabled={!file} onClick={generate}><span>✦</span> 開始 AI 空間渲染 <b>→</b></button>{file && <button className="reset" onClick={reset}>清除專案，重新開始</button>}<small className="promise">鎖定建築格局，不鎖室內設計；家具與材質會依風格重新規劃</small>
       </section></div>
     </section>}

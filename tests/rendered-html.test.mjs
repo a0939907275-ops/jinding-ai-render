@@ -4,8 +4,8 @@ import { readFile } from "node:fs/promises";
 
 test("MVP exposes the required workflow and API routes", async () => {
   const page = await readFile(new URL("../app/render-studio.tsx", import.meta.url), "utf8");
-  for (const text of ["一般模式", "專業模式", "上傳現場照片", "奶茶奢華", "保留", "移除", "新增", "/api/analyze-space", "/api/create-design", "/api/render", "/api/revise"]) assert.match(page, new RegExp(text));
-  for (const route of ["analyze-space", "create-design", "render", "revise", "research-style"]) assert.match(await readFile(new URL(`../app/api/${route}/route.ts`, import.meta.url), "utf8"), /export async function POST/);
+  for (const text of ["一般模式", "專業模式", "上傳現場照片", "奶茶奢華", "保留", "移除", "新增", "AutoLayoutPlanner", "/api/analyze-space", "/api/create-design", "/api/render", "/api/revise"]) assert.match(page, new RegExp(text));
+  for (const route of ["analyze-space", "create-design", "plan-layout", "render", "revise", "research-style"]) assert.match(await readFile(new URL(`../app/api/${route}/route.ts`, import.meta.url), "utf8"), /export async function POST/);
 });
 
 test("prompt engine preserves geometry and supports three layers", async () => {
@@ -44,4 +44,15 @@ test("general rendering uses the faster medium tier while professional stays hig
   const render = await readFile(new URL("../app/api/render/route.ts", import.meta.url), "utf8");
   assert.match(studio, /mode === "general" \? "customer" : "professional"/);
   assert.match(render, /fields\.audience === "customer" \? "medium" : "high"/);
+});
+
+test("professional auto layout creates structured A/B/C plans before rendering", async () => {
+  const planner = await readFile(new URL("../lib/layout-planning.ts", import.meta.url), "utf8");
+  const ui = await readFile(new URL("../app/auto-layout-planner.tsx", import.meta.url), "utf8");
+  const route = await readFile(new URL("../app/api/plan-layout/route.ts", import.meta.url), "utf8");
+  const prompt = await readFile(new URL("../lib/prompt-engine.ts", import.meta.url), "utf8");
+  for (const field of ["furnitureType", "position", "wall", "orientation", "approximateWidth", "approximateDepth", "locked", "scores"]) assert.match(planner, new RegExp(field));
+  for (const id of ["A", "B", "C"]) assert.match(planner, new RegExp(`\\"${id}\\"`));
+  assert.match(ui, /AI 自動配置/); assert.match(ui, /套用方案/);
+  assert.match(route, /json_schema/); assert.match(prompt, /Layout JSON/);
 });
