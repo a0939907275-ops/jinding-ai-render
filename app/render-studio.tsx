@@ -28,7 +28,7 @@ export default function RenderStudio({initialMode = "general"}: {initialMode?: M
   const [imageNotes, setImageNotes] = useState<ImageNote[]>([]);
   const [renderMode, setRenderMode] = useState<RenderMode>("strict");
   const [structureLock, setStructureLock] = useState(true);
-  const [cabinetLock, setCabinetLock] = useState(true);
+  const [cabinetLock, setCabinetLock] = useState(false);
   const [wallLock, setWallLock] = useState(true);
   const [openingsLock, setOpeningsLock] = useState(true);
   const [cameraLock, setCameraLock] = useState(true);
@@ -94,8 +94,8 @@ export default function RenderStudio({initialMode = "general"}: {initialMode?: M
       renderMode: mode === "professional" ? renderMode : "redesign",
       modelLock: String(mode === "professional" && renderMode !== "redesign"),
       annotations: mode === "professional" ? annotations : "無",
-      structureLock: String(structureLock), cabinetLock: String(cabinetLock), wallLock: String(wallLock),
-      openingsLock: String(openingsLock), cameraLock: String(cameraLock), materialZones,
+      structureLock: "true", cabinetLock: String(mode === "professional" && cabinetLock), wallLock: "true",
+      openingsLock: "true", cameraLock: "true", materialZones,
       colorTemperature, lightDirection, lightIntensity, furnitureReplacement, prompt, negativePrompt,
       seed, variation, hdOutput: String(mode === "professional" && hdOutput), referenceImage: referenceFile ? "已提供第二張參考圖，只能作為材質與風格參考" : "無",
     };
@@ -165,7 +165,7 @@ export default function RenderStudio({initialMode = "general"}: {initialMode?: M
         {style === "自訂" && <div className="custom-style-search"><input className="custom" value={customStyle} onChange={e => {setCustomStyle(e.target.value); setStyleResearch("");}} placeholder="直接輸入想要的風格"/><small>生成時由 GPT 整理材質、配色、家具與配置參考。</small></div>}
         <div className="quick-controls"><label>色系<input value={colorScheme} onChange={e => setColorScheme(e.target.value)} placeholder="暖白、奶茶、深木色…"/></label><label>基本燈光<select value={basicLighting} onChange={e => setBasicLighting(e.target.value)}><option>明亮自然光</option><option>溫暖情境光</option><option>中性均勻光</option><option>夜間氛圍光</option></select></label></div>
         {mode === "general" ? <label className="simple-request">簡單修改需求<textarea value={other} onChange={e => setOther(e.target.value)} placeholder="例如：增加收納、換成淺色沙發、整體更明亮…"/></label> : <ProfessionalControls preview={preview} imageNotes={imageNotes} setImageNotes={setImageNotes} renderMode={renderMode} setRenderMode={setRenderMode} values={{keep,remove,add,other,materialZones,colorTemperature,lightDirection,lightIntensity,furnitureReplacement,prompt,negativePrompt,seed,variation}} setters={{setKeep,setRemove,setAdd,setOther,setMaterialZones,setColorTemperature,setLightDirection,setLightIntensity,setFurnitureReplacement,setPrompt,setNegativePrompt,setSeed,setVariation}} locks={{structureLock,cabinetLock,wallLock,openingsLock,cameraLock}} lockSetters={{setStructureLock,setCabinetLock,setWallLock,setOpeningsLock,setCameraLock}} referencePreview={referencePreview} acceptReference={acceptReference} hdOutput={hdOutput} setHdOutput={setHdOutput}/>}
-        {error && <p className="error">{error}</p>}<button className="generate" disabled={!file} onClick={generate}><span>✦</span> 開始 AI 空間渲染 <b>→</b></button>{file && <button className="reset" onClick={reset}>清除專案，重新開始</button>}<small className="promise">兩種模式共用同一套 Render Engine、圖片與歷史版本</small>
+        {error && <p className="error">{error}</p>}<button className="generate" disabled={!file} onClick={generate}><span>✦</span> 開始 AI 空間渲染 <b>→</b></button>{file && <button className="reset" onClick={reset}>清除專案，重新開始</button>}<small className="promise">鎖定建築格局，不鎖室內設計；家具與材質會依風格重新規劃</small>
       </section></div>
     </section>}
     {phase === "working" && <div className="overlay"><div className="loader"><span>金</span><div className="rings"/></div><p>JINDING AI RENDERING</p><h2>{step === 0 ? "正在整理風格參考…" : step === 1 ? "正在理解空間結構…" : step === 2 ? "正在規劃設計方案…" : step === 3 ? "正在生成空間渲染…" : "正在延續上一版修改…"}</h2><div className="step-dots">{[1,2,3].map(n => <i key={n} className={step >= n ? "on" : ""}/>)}</div><small>請保持此頁開啟</small></div>}
@@ -182,7 +182,7 @@ function ProfessionalControls(props: any) {
   const {preview,imageNotes,setImageNotes,renderMode,setRenderMode,values,setters,locks,lockSetters,referencePreview,acceptReference,hdOutput,setHdOutput}=props;
   return <div className="professional-controls">
     {preview && <ImageAnnotator image={preview} notes={imageNotes} onChange={setImageNotes} mode={renderMode} onModeChange={setRenderMode}/>} 
-    <fieldset><legend>鎖定控制</legend><div className="lock-grid">{[["空間結構",locks.structureLock,lockSetters.setStructureLock],["櫃體比例",locks.cabinetLock,lockSetters.setCabinetLock],["牆面",locks.wallLock,lockSetters.setWallLock],["門窗比例",locks.openingsLock,lockSetters.setOpeningsLock],["Camera Lock",locks.cameraLock,lockSetters.setCameraLock]].map(([label,checked,setter]: any) => <label key={label}><input type="checkbox" checked={checked} onChange={e => setter(e.target.checked)}/>{label}</label>)}</div></fieldset>
+    <fieldset><legend>建築鎖定（不鎖室內設計）</legend><div className="lock-grid">{[["建築格局",locks.structureLock,lockSetters.setStructureLock],["櫃體比例（選用）",locks.cabinetLock,lockSetters.setCabinetLock],["牆面",locks.wallLock,lockSetters.setWallLock],["門窗比例",locks.openingsLock,lockSetters.setOpeningsLock],["Camera Lock",locks.cameraLock,lockSetters.setCameraLock]].map(([label,checked,setter]: any) => <label key={label}><input type="checkbox" checked={checked} onChange={e => setter(e.target.checked)}/>{label}</label>)}</div></fieldset>
     <div className="requirements"><TextField label="保留" value={values.keep} set={setters.setKeep}/><TextField label="移除" value={values.remove} set={setters.setRemove}/><TextField label="新增" value={values.add} set={setters.setAdd}/><TextField label="其他" value={values.other} set={setters.setOther}/></div>
     <div className="advanced-grid"><TextField label="材質分區控制" value={values.materialZones} set={setters.setMaterialZones}/><TextField label="家具替換" value={values.furnitureReplacement} set={setters.setFurnitureReplacement}/><label>燈光色溫<input value={values.colorTemperature} onChange={e => setters.setColorTemperature(e.target.value)}/></label><label>方向<input value={values.lightDirection} onChange={e => setters.setLightDirection(e.target.value)}/></label><label>強度<select value={values.lightIntensity} onChange={e => setters.setLightIntensity(e.target.value)}><option>低</option><option>中等</option><option>高</option></select></label><label>Seed / Variation<input value={`${values.seed}${values.seed ? " / " : ""}${values.variation}`} onChange={e => {const [seed,variation] = e.target.value.split("/"); setters.setSeed(seed.trim()); setters.setVariation((variation || "1").trim());}} placeholder="例如 42 / 1"/></label></div>
     <TextField label="Prompt" value={values.prompt} set={setters.setPrompt}/><TextField label="Negative Prompt" value={values.negativePrompt} set={setters.setNegativePrompt}/>

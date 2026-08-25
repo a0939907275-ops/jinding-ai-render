@@ -9,8 +9,9 @@ export async function POST(request: Request) {
   try {
     const input = await request.json();
     validateTextFields(Object.fromEntries(Object.entries(input).filter((entry): entry is [string,string] => typeof entry[1] === "string")));
-    const brief = `空間分析：${input.analysis}\n風格：${input.style}\n保留：${input.keep || "未指定"}\n移除：${input.remove || "未指定"}\n新增：${input.add || "未指定"}\n其他：${input.other || "未指定"}`;
-    const instructions = input.modelLock ? `${DESIGN_DIRECTOR}\n\n本次是設計師 SketchUp 模型渲染，不是重新設計。不得提出移動、替換、增刪或改變任何既有模組的方案。只描述如何在完全相同的模型幾何、鏡頭和配置上提升材質、色彩、反射、燈光、陰影與攝影質感，並遵守圖片定位備註。` : DESIGN_DIRECTOR;
+    const brief = `空間分析：${input.analysis}\n風格：${input.style}\n色系：${input.colorScheme || "依風格"}\n燈光：${input.basicLighting || "依風格"}\n保留：${input.keep || "僅鎖定建築格局"}\n移除：${input.remove || "未指定"}\n新增：${input.add || "依風格完整設計"}\n使用者明確要求（優先於風格）：${input.other || "未指定"}`;
+    const modelLock = input.modelLock === true || input.modelLock === "true";
+    const instructions = modelLock ? `${DESIGN_DIRECTOR}\n\n本次開啟專業模型鎖定。依 renderMode 與圖片定位備註限制修改範圍；只有 strict 模式才鎖定所有模型幾何。其他模式仍可在允許範圍重新設計家具、櫃體外觀、材質與燈光。` : DESIGN_DIRECTOR;
     const json = await openAI("/responses", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: process.env.OPENAI_TEXT_MODEL || "gpt-5-mini", instructions, input: `${brief}\n圖片定位備註：${input.annotations || "無"}` }) });
     return Response.json({ design: responseText(json) });
   } catch (error) { return failure(error); }

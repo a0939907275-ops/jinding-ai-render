@@ -11,7 +11,17 @@ test("MVP exposes the required workflow and API routes", async () => {
 test("prompt engine preserves geometry and supports three layers", async () => {
   const prompts = await readFile(new URL("../lib/prompt-engine.ts", import.meta.url), "utf8");
   for (const layer of ["SPACE_ANALYZER", "DESIGN_DIRECTOR", "RENDER_DIRECTOR"]) assert.match(prompts, new RegExp(layer));
-  assert.match(prompts, /保留原始相機位置/); assert.match(prompts, /不得新增門窗或改變格局/);
+  assert.match(prompts, /camera perspective, framing and spatial proportions/); assert.match(prompts, /不得新增、刪除或移動房間/);
+  assert.match(prompts, /Do not preserve existing furniture unless required by the user/);
+  assert.match(prompts, /使用者明確要求/);
+});
+
+test("general mode locks architecture without locking interior design", async () => {
+  const studio = await readFile(new URL("../app/render-studio.tsx", import.meta.url), "utf8");
+  const designRoute = await readFile(new URL("../app/api/create-design/route.ts", import.meta.url), "utf8");
+  assert.match(studio, /structureLock: "true"/);
+  assert.match(studio, /mode === "professional" && cabinetLock/);
+  assert.match(designRoute, /input\.modelLock === true \|\| input\.modelLock === "true"/);
 });
 
 test("designer annotations support precise SVG lines, endpoint movement and copying", async () => {
