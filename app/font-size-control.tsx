@@ -9,7 +9,10 @@ function subscribe(callback: () => void) { window.addEventListener("storage", ca
 
 export default function FontSizeControl() {
   const size = useSyncExternalStore(subscribe, readSize, () => 100);
-  useEffect(() => { document.documentElement.style.setProperty("--font-scale", String(size / 100)); }, [size]);
+  useEffect(() => {
+    document.documentElement.style.setProperty("--font-scale", String(size / 100));
+    document.documentElement.style.setProperty("--layout-width", `${10000 / size}%`);
+  }, [size]);
   function change(direction: -1 | 1) {
     const index = levels.indexOf(size);
     const next = levels[Math.max(0, Math.min(levels.length - 1, index + direction))];
